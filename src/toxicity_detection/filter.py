@@ -22,7 +22,7 @@ class ToxicityFilter:
     detectors: list[ToxicityDetector] = field(default_factory=list)
 
     @classmethod
-    def default(cls) -> "ToxicityFilter":
+    def default(cls) -> ToxicityFilter:
         return cls(detectors=[LocalRuleToxicityDetector.from_package_data()])
 
     def check(self, text: str) -> ToxicityResult:

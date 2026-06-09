@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from toxicity_detection.schemas import ToxicityCategory
 
-
 _RESPONSES_ES = {
     ToxicityCategory.OBSCENE: "Esa clase de conversacion no es apropiada para mi. Cambiemos a un tema mas respetuoso.",
     ToxicityCategory.THREAT: "Las amenazas no son aceptables en esta conversacion. Puedo ayudarte si mantenemos un tono respetuoso.",

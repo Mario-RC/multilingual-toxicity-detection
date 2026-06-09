@@ -7,14 +7,13 @@ models are unavailable.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from importlib import resources
 import re
 import string
 import unicodedata
+from dataclasses import dataclass, field
+from importlib import resources
 
 from toxicity_detection.schemas import ToxicityCategory, ToxicityResult
-
 
 SPECIAL_CHARS = "!\"#$%&()+,./:;<=>?[\\]^_`{|}~"
 
@@ -146,7 +145,7 @@ class LocalRuleToxicityDetector:
         self._prohibited_max_phrase_len = _max_phrase_len(self.prohibited_terms)
 
     @classmethod
-    def from_package_data(cls) -> "LocalRuleToxicityDetector":
+    def from_package_data(cls) -> LocalRuleToxicityDetector:
         offensive = _load_resource_lines("offensive_phrases_preprocessed.txt")
         prohibited = _load_resource_lines("prohibited_terms.txt")
         offensive = (offensive - {_normalize_text(item) for item in REMOVE_FROM_BLACKLIST}) | {

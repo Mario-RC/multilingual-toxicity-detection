@@ -32,7 +32,7 @@ class ToxicityResult:
     matched_text: str | None = None
 
     @classmethod
-    def safe(cls) -> "ToxicityResult":
+    def safe(cls) -> ToxicityResult:
         return cls(flagged=False)
 
     @classmethod
@@ -44,7 +44,7 @@ class ToxicityResult:
         score: float = 1.0,
         labels: dict[str, float] | None = None,
         matched_text: str | None = None,
-    ) -> "ToxicityResult":
+    ) -> ToxicityResult:
         return cls(
             flagged=True,
             category=category,

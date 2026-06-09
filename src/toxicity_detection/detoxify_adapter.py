@@ -10,7 +10,6 @@ from dataclasses import dataclass, field
 
 from toxicity_detection.schemas import ToxicityCategory, ToxicityResult
 
-
 DEFAULT_DETOXIFY_THRESHOLDS = {
     "toxicity": 0.2,
     "severe_toxicity": 0.2,

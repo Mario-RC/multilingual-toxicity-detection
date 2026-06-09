@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from toxicity_detection.runtime import resolve_device
 from toxicity_detection.schemas import ToxicityCategory, ToxicityResult
 
-
 LLAMA_GUARD_CATEGORY_MAP = {
     "O1": ToxicityCategory.VIOLENCE_AND_HATE,
     "O2": ToxicityCategory.SEXUAL_EXPLICIT,
