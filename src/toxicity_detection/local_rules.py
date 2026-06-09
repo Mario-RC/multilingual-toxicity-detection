@@ -32,7 +32,6 @@ WHITELIST_PHRASES = {
 }
 
 REMOVE_FROM_BLACKLIST = {
-    "god",
     "gods",
     "ginger",
     "gay",
