@@ -29,34 +29,62 @@ python -m pip install -e ".[llama-guard]"
 
 Run the default local detector:
 
+Spanish:
+
 ```bash
 toxicity-detect "Hola, me gustaria hablar de musica."
-toxicity-detect "Eres un idiota." --language es --response
+toxicity-detect "Por favor, callate." --language es --response
+```
+
+English:
+
+```bash
+toxicity-detect "I would like to talk about music." --language en
+toxicity-detect "Please shut up." --language en --response
 ```
 
 JSON output is available for integration:
 
 ```bash
-toxicity-detect "Te voy a matar." --json --response
+toxicity-detect "Por favor, callate." --language es --json --response
+toxicity-detect "Please shut up." --language en --json --response
 ```
 
 The CLI also reads from standard input:
 
 ```bash
 printf "texto a revisar" | toxicity-detect --json
+printf "text to review" | toxicity-detect --language en --json
 ```
 
 ## Python API
+
+Spanish:
 
 ```python
 from toxicity_detection import ToxicityCategory, ToxicityFilter, toxicity_response
 
 detector = ToxicityFilter.default()
-result = detector.check("Eres un idiota.")
+result = detector.check("Por favor, callate.")
 
 if result.flagged:
     print(result.category)
     print(toxicity_response(result.category, language="es"))
+else:
+    print(ToxicityCategory.SAFE)
+```
+
+English:
+
+```python
+from toxicity_detection import ToxicityCategory, ToxicityFilter, toxicity_response
+
+detector = ToxicityFilter.default()
+result = detector.check("Please shut up.")
+
+if result.flagged:
+    print(result.category)
+    print(toxicity_response(result.category, language="en"))
 else:
     print(ToxicityCategory.SAFE)
 ```
@@ -92,4 +120,3 @@ Toxicity detection is probabilistic and context-sensitive, even when local rules
 ## License
 
 See `LICENSE`.
-

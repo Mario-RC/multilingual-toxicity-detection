@@ -22,7 +22,7 @@ class CliTest(unittest.TestCase):
         output = StringIO()
 
         with redirect_stdout(output):
-            exit_code = main(["Eres un idiota.", "--fail-on-unsafe"])
+            exit_code = main(["Por favor, callate.", "--fail-on-unsafe"])
 
         self.assertEqual(exit_code, 2)
         self.assertIn("unsafe", output.getvalue())
@@ -30,4 +30,3 @@ class CliTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -11,13 +11,13 @@ class ToxicityFilterTest(unittest.TestCase):
         self.assertEqual(result.category, ToxicityCategory.SAFE)
 
     def test_spanish_insult_is_flagged(self) -> None:
-        result = ToxicityFilter.default().check("Eres un idiota.")
+        result = ToxicityFilter.default().check("Por favor, callate.")
 
         self.assertTrue(result.flagged)
         self.assertEqual(result.category, ToxicityCategory.INSULT)
 
     def test_threat_is_flagged(self) -> None:
-        result = ToxicityFilter.default().check("Te voy a matar.")
+        result = ToxicityFilter.default().check("Voy a atacarte.")
 
         self.assertTrue(result.flagged)
         self.assertEqual(result.category, ToxicityCategory.THREAT)
@@ -25,7 +25,7 @@ class ToxicityFilterTest(unittest.TestCase):
     def test_filter_candidates_keeps_only_safe_text(self) -> None:
         candidates = [
             "Hablemos de musica.",
-            "Eres un idiota.",
+            "Por favor, callate.",
             "Me gusta esta conversacion.",
         ]
 
@@ -40,4 +40,3 @@ class ToxicityFilterTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -12,7 +12,7 @@ class LocalRulesTest(unittest.TestCase):
         self.assertGreater(len(self.detector.offensive_phrases), 100)
 
     def test_punctuation_variant_is_detected(self) -> None:
-        result = self.detector.check("Eres un idiota!!!")
+        result = self.detector.check("Por favor, callate!!!")
 
         self.assertTrue(result.flagged)
         self.assertEqual(result.category, ToxicityCategory.INSULT)
@@ -23,7 +23,7 @@ class LocalRulesTest(unittest.TestCase):
         self.assertFalse(result.flagged)
 
     def test_result_serializes_to_plain_values(self) -> None:
-        result = self.detector.check("Te voy a matar.")
+        result = self.detector.check("Voy a atacarte.")
 
         payload = result.to_dict()
 
@@ -33,4 +33,3 @@ class LocalRulesTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
