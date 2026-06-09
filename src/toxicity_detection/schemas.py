@@ -1,0 +1,66 @@
+"""Toxicity classification data structures."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any
+
+
+class ToxicityCategory(str, Enum):
+    SAFE = "safe"
+    OBSCENE = "obscene"
+    THREAT = "threat"
+    INSULT = "insult"
+    IDENTITY_ATTACK = "identity_attack"
+    SEXUAL_EXPLICIT = "sexual_explicit"
+    VIOLENCE_AND_HATE = "violence_and_hate"
+    CRIMINAL_PLANNING = "criminal_planning"
+    GUNS_AND_ILLEGAL_WEAPONS = "guns_and_illegal_weapons"
+    REGULATED_OR_CONTROLLED_SUBSTANCES = "regulated_or_controlled_substances"
+    SELF_HARM = "self_harm"
+    PROHIBITED_TERM = "palabra_no_adecuada"
+
+
+@dataclass(frozen=True)
+class ToxicityResult:
+    flagged: bool
+    category: ToxicityCategory = ToxicityCategory.SAFE
+    source: str = "none"
+    score: float = 0.0
+    labels: dict[str, float] = field(default_factory=dict)
+    matched_text: str | None = None
+
+    @classmethod
+    def safe(cls) -> "ToxicityResult":
+        return cls(flagged=False)
+
+    @classmethod
+    def flagged_result(
+        cls,
+        category: ToxicityCategory,
+        *,
+        source: str,
+        score: float = 1.0,
+        labels: dict[str, float] | None = None,
+        matched_text: str | None = None,
+    ) -> "ToxicityResult":
+        return cls(
+            flagged=True,
+            category=category,
+            source=source,
+            score=score,
+            labels=labels or {},
+            matched_text=matched_text,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "flagged": self.flagged,
+            "category": self.category.value,
+            "source": self.source,
+            "score": self.score,
+            "labels": dict(self.labels),
+            "matched_text": self.matched_text,
+        }
+
