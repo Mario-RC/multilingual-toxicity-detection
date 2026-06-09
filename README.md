@@ -20,7 +20,7 @@ The filter can be applied to both user inputs and chatbot responses. Messages ar
 
 This order is intentional: the rule-based layer has the lowest latency and highest interpretability, so it rejects obvious cases before any model inference is needed. Detoxify adds fine-grained probabilistic scoring at moderate cost, while Llama Guard provides broader context-aware moderation when more precision is needed for subtle or policy-sensitive content. As a result, the sequential architecture is faster for simple toxicity and becomes progressively slower only when deeper analysis is required for more complex cases.
 
-The repository does not include curated offensive-term lists. If you want the rule-based layer to cover more words or domain-specific expressions, provide your own newline-delimited `.txt` files and pass them through the CLI or the Python API.
+The rule-based layer is data-driven. To extend it without changing Python code, add `.txt` files to the appropriate folder under `src/toxicity_detection/data/`: use `terms/` for words and phrases, and `patterns/` for category-specific regular expressions. The loader reads every `.txt` file in those folders at import time.
 
 ## Installation
 
@@ -66,6 +66,46 @@ Use custom rule lists when you need more coverage:
 toxicity-detect "text to review" --prohibited-terms-file ./prohibited_terms.txt
 toxicity-detect "text to review" --offensive-phrases-file ./offensive_phrases.txt
 ```
+
+You can also add reusable project rules directly under `data/`:
+
+```text
+src/toxicity_detection/data/
+  terms/
+    default_terms.txt
+    my_domain_terms.txt
+  patterns/
+    default_patterns.txt
+    my_domain_patterns.txt
+```
+
+Files in `terms/` use sections so the detector knows how to apply each line:
+
+```text
+[whitelist]
+benign phrase
+
+[remove]
+term to remove from local blacklist
+
+[add]
+term to always add to local blacklist
+
+[offensive]
+offensive phrase
+
+[prohibited]
+prohibited term
+```
+
+Files in `patterns/` use one regex per line with the format `<category><TAB><regex>`:
+
+```text
+insult	\b(example insult)\b
+threat	\b(example threat)\b
+```
+
+Private local lists can remain outside Git. The repository ignores the legacy local files `src/toxicity_detection/data/offensive_phrases_preprocessed.txt` and `src/toxicity_detection/data/prohibited_terms.txt`.
 
 The CLI also reads from standard input:
 
@@ -117,7 +157,7 @@ detector = ToxicityFilter(
 
 ```text
 src/toxicity_detection/    importable Python package
-src/toxicity_detection/data optional private rule-list location
+src/toxicity_detection/data extensible rule files
 tests/                     unit tests
 examples/                  minimal usage examples
 docs/                      architecture and adapter notes

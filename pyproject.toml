@@ -52,6 +52,12 @@ toxicity-detect = "toxicity_detection.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"toxicity_detection.data" = [
+  "patterns/*.txt",
+  "terms/*.txt",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

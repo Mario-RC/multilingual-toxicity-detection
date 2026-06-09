@@ -18,113 +18,81 @@ from toxicity_detection.schemas import ToxicityCategory, ToxicityResult
 
 SPECIAL_CHARS = "!\"#$%&()+,./:;<=>?[\\]^_`{|}~"
 
-WHITELIST_PHRASES = {
-    "kill bill",
-    "to kill a mockingbird",
-    "moby dick",
-    "dick van dyke",
-    "sex education",
-    "sex and the city",
-    "suicide squad",
-    "hells kitchen",
-    "hell's kitchen",
-    "die hard",
-}
 
-REMOVE_FROM_BLACKLIST = {
-    "gods",
-    "ginger",
-    "gay",
-    "lesbian",
-    "lesbians",
-    "balls",
-    "crabs",
-    "dammit",
-    "damn",
-    "darn",
-    "dirty",
-    "murder",
-    "omg",
-    "organ",
-    "organs",
-    "queer",
-    "sexes",
-    "psycho",
-    "ugly",
-    "trashy",
-    "crappy",
-    "shitty",
-    "sucks",
-    "stupid",
-}
+def _load_rule_terms(directory: str) -> tuple[set[str], set[str], set[str], set[str], set[str]]:
+    terms_by_section: dict[str, set[str]] = {
+        "whitelist": set(),
+        "remove": set(),
+        "add": set(),
+        "offensive": set(),
+        "prohibited": set(),
+    }
+    for filename, data in _iter_resource_text_files(directory):
+        current_section: str | None = None
+        with data.open("r", encoding="utf-8", errors="ignore") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    continue
+                if stripped.startswith("[") and stripped.endswith("]"):
+                    current_section = stripped[1:-1].strip()
+                    if current_section not in terms_by_section:
+                        raise ValueError(f"{filename}:{line_number} has unknown section {stripped}")
+                    continue
+                if current_section is None:
+                    raise ValueError(f"{filename}:{line_number} must appear inside a section")
+                terms_by_section[current_section].add(stripped)
+    return (
+        terms_by_section["whitelist"],
+        terms_by_section["remove"],
+        terms_by_section["add"],
+        terms_by_section["offensive"],
+        terms_by_section["prohibited"],
+    )
 
-ADD_TO_BLACKLIST = {
-    "pornographic",
-    "prostitution",
-    "blackface",
-    "misogyny",
-    "talk dirty",
-    "dirty talk",
-}
 
-CATEGORY_PATTERNS: tuple[tuple[ToxicityCategory, tuple[str, ...]], ...] = (
-    (
-        ToxicityCategory.SELF_HARM,
-        (
-            r"\b(self[- ]?harm|kill myself|hurt myself|suicide)\b",
-            r"\b(suicidarme|hacerme dano|quitarme la vida|autolesion)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.THREAT,
-        (
-            r"\b(i will kill|i am going to kill|i will hurt|i will attack)\b",
-            r"\b(te voy a matar|voy a matarte|te hare dano|voy a atacarte)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.CRIMINAL_PLANNING,
-        (
-            r"\b(how to rob|how to steal|plan a robbery|hide a body)\b",
-            r"\b(como robar|planear un robo|ocultar un cuerpo)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.GUNS_AND_ILLEGAL_WEAPONS,
-        (
-            r"\b(illegal weapon|unregistered gun|make a bomb)\b",
-            r"\b(arma ilegal|pistola ilegal|fabricar una bomba)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.REGULATED_OR_CONTROLLED_SUBSTANCES,
-        (
-            r"\b(sell drugs|make cocaine|make meth)\b",
-            r"\b(vender droga|fabricar cocaina|fabricar metanfetamina)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.SEXUAL_EXPLICIT,
-        (
-            r"\b(explicit sexual|pornographic|sexual act)\b",
-            r"\b(sexual explicito|pornografico|acto sexual)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.VIOLENCE_AND_HATE,
-        (
-            r"\b(exterminate|violent hate|hate all)\b",
-            r"\b(exterminar|odio violento|odio a todos)\b",
-        ),
-    ),
-    (
-        ToxicityCategory.INSULT,
-        (
-            r"\b(idiot|moron|shut up)\b",
-            r"\b(idiota|imbecil|callate|gilipollas)\b",
-        ),
-    ),
-)
+def _load_category_patterns(directory: str) -> tuple[tuple[ToxicityCategory, tuple[str, ...]], ...]:
+    patterns_by_category: dict[ToxicityCategory, list[str]] = {}
+    for filename, data in _iter_resource_text_files(directory):
+        with data.open("r", encoding="utf-8", errors="ignore") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                if not _is_data_line(line):
+                    continue
+                try:
+                    category_value, pattern = line.rstrip("\n").split("\t", 1)
+                except ValueError as exc:
+                    raise ValueError(
+                        f"{filename}:{line_number} must contain '<category>\\t<regex>'"
+                    ) from exc
+                category = ToxicityCategory(category_value)
+                patterns_by_category.setdefault(category, []).append(pattern)
+    return tuple(
+        (category, tuple(patterns)) for category, patterns in patterns_by_category.items()
+    )
+
+
+def _iter_resource_text_files(directory: str):
+    data_directory = resources.files("toxicity_detection.data").joinpath(directory)
+    if not data_directory.is_dir():
+        return
+    for item in sorted(data_directory.iterdir(), key=lambda resource: resource.name):
+        if item.is_file() and item.name.endswith(".txt"):
+            yield f"{directory}/{item.name}", item
+
+
+def _is_data_line(line: str) -> bool:
+    stripped = line.strip()
+    return bool(stripped and not stripped.startswith("#"))
+
+
+(
+    WHITELIST_PHRASES,
+    REMOVE_FROM_BLACKLIST,
+    ADD_TO_BLACKLIST,
+    PACKAGE_OFFENSIVE_PHRASES,
+    PACKAGE_PROHIBITED_TERMS,
+) = _load_rule_terms("terms")
+CATEGORY_PATTERNS = _load_category_patterns("patterns")
 
 
 @dataclass
@@ -146,8 +114,12 @@ class LocalRuleToxicityDetector:
 
     @classmethod
     def from_package_data(cls) -> LocalRuleToxicityDetector:
-        offensive = _load_optional_resource_lines("offensive_phrases_preprocessed.txt")
-        prohibited = _load_optional_resource_lines("prohibited_terms.txt")
+        offensive = set(PACKAGE_OFFENSIVE_PHRASES) | _load_optional_resource_lines(
+            "offensive_phrases_preprocessed.txt"
+        )
+        prohibited = set(PACKAGE_PROHIBITED_TERMS) | _load_optional_resource_lines(
+            "prohibited_terms.txt"
+        )
         return cls._with_policy_adjustments(offensive, prohibited)
 
     @classmethod

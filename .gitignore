@@ -35,4 +35,5 @@ models/
 checkpoints/
 
 # Private local rule lists
-src/toxicity_detection/data/*.txt
+src/toxicity_detection/data/offensive_phrases_preprocessed.txt
+src/toxicity_detection/data/prohibited_terms.txt

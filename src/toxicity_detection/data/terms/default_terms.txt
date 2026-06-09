@@ -1,0 +1,45 @@
+[whitelist]
+kill bill
+to kill a mockingbird
+moby dick
+dick van dyke
+sex education
+sex and the city
+suicide squad
+hells kitchen
+hell's kitchen
+die hard
+
+[remove]
+gods
+ginger
+gay
+lesbian
+lesbians
+balls
+crabs
+dammit
+damn
+darn
+dirty
+murder
+omg
+organ
+organs
+queer
+sexes
+psycho
+ugly
+trashy
+crappy
+shitty
+sucks
+stupid
+
+[add]
+pornographic
+prostitution
+blackface
+misogyny
+talk dirty
+dirty talk

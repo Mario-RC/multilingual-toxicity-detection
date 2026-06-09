@@ -1,0 +1,16 @@
+self_harm	\b(self[- ]?harm|kill myself|hurt myself|suicide)\b
+self_harm	\b(suicidarme|hacerme dano|quitarme la vida|autolesion)\b
+threat	\b(i will kill|i am going to kill|i will hurt|i will attack)\b
+threat	\b(te voy a matar|voy a matarte|te hare dano|voy a atacarte)\b
+criminal_planning	\b(how to rob|how to steal|plan a robbery|hide a body)\b
+criminal_planning	\b(como robar|planear un robo|ocultar un cuerpo)\b
+guns_and_illegal_weapons	\b(illegal weapon|unregistered gun|make a bomb)\b
+guns_and_illegal_weapons	\b(arma ilegal|pistola ilegal|fabricar una bomba)\b
+regulated_or_controlled_substances	\b(sell drugs|make cocaine|make meth)\b
+regulated_or_controlled_substances	\b(vender droga|fabricar cocaina|fabricar metanfetamina)\b
+sexual_explicit	\b(explicit sexual|pornographic|sexual act)\b
+sexual_explicit	\b(sexual explicito|pornografico|acto sexual)\b
+violence_and_hate	\b(exterminate|violent hate|hate all)\b
+violence_and_hate	\b(exterminar|odio violento|odio a todos)\b
+insult	\b(idiot|moron|shut up)\b
+insult	\b(idiota|imbecil|callate|gilipollas)\b
