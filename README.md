@@ -14,60 +14,17 @@ The package is designed to stay lightweight on import: local rules run without m
 
 ## Filtering Pipeline
 
-![Sequential toxicity filtering pipeline](docs/sequential_toxicity_filtering_pipeline.png)
-
 The filter can be applied to both user inputs and chatbot responses. Messages are checked sequentially: fast local rules catch clear violations first, then optional model adapters such as Detoxify and Llama Guard can add probabilistic and context-aware moderation. When any layer flags a message, the pipeline returns the detected category, source, score, and can trigger a multilingual mitigation response instead of passing unsafe text forward.
+
+![Sequential toxicity filtering pipeline](docs/sequential_toxicity_filtering_pipeline.png)
 
 This order is intentional: the rule-based layer has the lowest latency and highest interpretability, so it rejects obvious cases before any model inference is needed. Detoxify adds fine-grained probabilistic scoring at moderate cost, while Llama Guard provides broader context-aware moderation when more precision is needed for subtle or policy-sensitive content. As a result, the sequential architecture is faster for simple toxicity and becomes progressively slower only when deeper analysis is required for more complex cases.
 
 The rule-based layer is data-driven. To extend it without changing Python code, add `.txt` files to the appropriate folder under `src/toxicity_detection/data/`: use `terms/` for words and phrases, and `patterns/` for category-specific regular expressions. The loader reads every `.txt` file in those folders at import time.
 
-## Installation
+## Rule Files for Rule-Based Filtering
 
-```bash
-python -m pip install -e ".[dev]"
-```
-
-Install optional model adapters only when needed:
-
-```bash
-python -m pip install -e ".[detoxify]"
-python -m pip install -e ".[llama-guard]"
-```
-
-## CLI
-
-Run the default local detector:
-
-Spanish:
-
-```bash
-toxicity-detect "Hola, me gustaria hablar de musica."
-toxicity-detect "Por favor, callate." --language es --response
-```
-
-English:
-
-```bash
-toxicity-detect "I would like to talk about music." --language en
-toxicity-detect "Please shut up." --language en --response
-```
-
-JSON output is available for integration:
-
-```bash
-toxicity-detect "Por favor, callate." --language es --json --response
-toxicity-detect "Please shut up." --language en --json --response
-```
-
-Use custom rule lists when you need more coverage:
-
-```bash
-toxicity-detect "text to review" --prohibited-terms-file ./prohibited_terms.txt
-toxicity-detect "text to review" --offensive-phrases-file ./offensive_phrases.txt
-```
-
-You can also add reusable project rules directly under `data/`:
+You can add reusable project rules directly under `data/`:
 
 ```text
 src/toxicity_detection/data/
@@ -107,6 +64,51 @@ threat	\b(example threat)\b
 
 Private local lists can remain outside Git. The repository ignores the legacy local files `src/toxicity_detection/data/offensive_phrases_preprocessed.txt` and `src/toxicity_detection/data/prohibited_terms.txt`.
 
+## Installation
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+Install optional model adapters only when needed:
+
+```bash
+python -m pip install -e ".[detoxify]"
+python -m pip install -e ".[llama-guard]"
+```
+
+## CLI
+
+Run the default local detector:
+
+Spanish:
+
+```bash
+toxicity-detect "Hola, me gustaría hablar de música."
+toxicity-detect "Por favor, cállate." --language es --response
+```
+
+English:
+
+```bash
+toxicity-detect "I would like to talk about music." --language en
+toxicity-detect "Please shut up." --language en --response
+```
+
+JSON output is available for integration:
+
+```bash
+toxicity-detect "Por favor, cállate." --language es --json --response
+toxicity-detect "Please shut up." --language en --json --response
+```
+
+Use custom rule lists when you need more coverage:
+
+```bash
+toxicity-detect "text to review" --prohibited-terms-file ./prohibited_terms.txt
+toxicity-detect "text to review" --offensive-phrases-file ./offensive_phrases.txt
+```
+
 The CLI also reads from standard input:
 
 ```bash
@@ -122,7 +124,7 @@ from toxicity_detection import ToxicityCategory, ToxicityFilter, toxicity_respon
 detector = ToxicityFilter.default()
 
 examples = [
-    ("es", "Por favor, callate."),
+    ("es", "Por favor, cállate."),
     ("en", "Please shut up."),
 ]
 
