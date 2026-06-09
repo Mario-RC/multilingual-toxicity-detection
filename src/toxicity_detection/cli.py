@@ -63,19 +63,25 @@ def main(argv: list[str] | None = None) -> int:
     if not args.no_local_rules:
         detectors.append(LocalRuleToxicityDetector.from_package_data())
     if args.detoxify:
-        detectors.append(
-            DetoxifyToxicityDetector(
-                model_type=args.detoxify_model_type,
-                checkpoint=args.detoxify_checkpoint,
+        try:
+            detectors.append(
+                DetoxifyToxicityDetector(
+                    model_type=args.detoxify_model_type,
+                    checkpoint=args.detoxify_checkpoint,
+                )
             )
-        )
+        except ImportError as exc:
+            parser.error(str(exc))
     if args.llama_guard_model:
-        detectors.append(
-            LlamaGuardToxicityDetector(
-                model_id=args.llama_guard_model,
-                device=args.device,
+        try:
+            detectors.append(
+                LlamaGuardToxicityDetector(
+                    model_id=args.llama_guard_model,
+                    device=args.device,
+                )
             )
-        )
+        except ImportError as exc:
+            parser.error(str(exc))
     if not detectors:
         parser.error("enable at least one detector")
 
@@ -123,4 +129,3 @@ def _print_result(result, *, language: str, as_json: bool, include_response: boo
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
