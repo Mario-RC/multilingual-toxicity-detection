@@ -12,6 +12,12 @@ The package is designed to stay lightweight on import: local rules run without m
 - Optional Llama Guard-style adapter for Hugging Face causal language models.
 - Python API, command-line interface, tests, and CI-ready project metadata.
 
+## Filtering Pipeline
+
+![Sequential toxicity filtering pipeline](docs/sequential_toxicity_filtering_pipeline.png)
+
+The filter can be applied to both user inputs and chatbot responses. Messages are checked sequentially: fast local rules catch clear violations first, then optional model adapters such as Detoxify and Llama Guard can add probabilistic and context-aware moderation. When any layer flags a message, the pipeline returns the detected category, source, score, and can trigger a multilingual mitigation response instead of passing unsafe text forward.
+
 ## Installation
 
 ```bash
