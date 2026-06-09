@@ -18,6 +18,10 @@ The package is designed to stay lightweight on import: local rules run without m
 
 The filter can be applied to both user inputs and chatbot responses. Messages are checked sequentially: fast local rules catch clear violations first, then optional model adapters such as Detoxify and Llama Guard can add probabilistic and context-aware moderation. When any layer flags a message, the pipeline returns the detected category, source, score, and can trigger a multilingual mitigation response instead of passing unsafe text forward.
 
+This order is intentional: the rule-based layer has the lowest latency and highest interpretability, so it rejects obvious cases before any model inference is needed. Detoxify adds fine-grained probabilistic scoring at moderate cost, while Llama Guard provides broader context-aware moderation when more precision is needed for subtle or policy-sensitive content. As a result, the sequential architecture is faster for simple toxicity and becomes progressively slower only when deeper analysis is required for more complex cases.
+
+The repository does not include curated offensive-term lists. If you want the rule-based layer to cover more words or domain-specific expressions, provide your own newline-delimited `.txt` files and pass them through the CLI or the Python API.
+
 ## Installation
 
 ```bash
@@ -54,6 +58,13 @@ JSON output is available for integration:
 ```bash
 toxicity-detect "Por favor, callate." --language es --json --response
 toxicity-detect "Please shut up." --language en --json --response
+```
+
+Use custom rule lists when you need more coverage:
+
+```bash
+toxicity-detect "text to review" --prohibited-terms-file ./prohibited_terms.txt
+toxicity-detect "text to review" --offensive-phrases-file ./offensive_phrases.txt
 ```
 
 The CLI also reads from standard input:
@@ -93,7 +104,10 @@ from toxicity_detection.detoxify_adapter import DetoxifyToxicityDetector
 
 detector = ToxicityFilter(
     detectors=[
-        LocalRuleToxicityDetector.from_package_data(),
+        LocalRuleToxicityDetector.from_files(
+            offensive_phrases_path="./offensive_phrases.txt",
+            prohibited_terms_path="./prohibited_terms.txt",
+        ),
         DetoxifyToxicityDetector(model_type="multilingual"),
     ]
 )
@@ -103,7 +117,7 @@ detector = ToxicityFilter(
 
 ```text
 src/toxicity_detection/    importable Python package
-src/toxicity_detection/data packaged rule lists
+src/toxicity_detection/data optional private rule-list location
 tests/                     unit tests
 examples/                  minimal usage examples
 docs/                      architecture and adapter notes

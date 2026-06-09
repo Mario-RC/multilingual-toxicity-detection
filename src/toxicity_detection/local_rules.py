@@ -12,6 +12,7 @@ import string
 import unicodedata
 from dataclasses import dataclass, field
 from importlib import resources
+from pathlib import Path
 
 from toxicity_detection.schemas import ToxicityCategory, ToxicityResult
 
@@ -146,8 +147,27 @@ class LocalRuleToxicityDetector:
 
     @classmethod
     def from_package_data(cls) -> LocalRuleToxicityDetector:
-        offensive = _load_resource_lines("offensive_phrases_preprocessed.txt")
-        prohibited = _load_resource_lines("prohibited_terms.txt")
+        offensive = _load_optional_resource_lines("offensive_phrases_preprocessed.txt")
+        prohibited = _load_optional_resource_lines("prohibited_terms.txt")
+        return cls._with_policy_adjustments(offensive, prohibited)
+
+    @classmethod
+    def from_files(
+        cls,
+        *,
+        offensive_phrases_path: str | Path | None = None,
+        prohibited_terms_path: str | Path | None = None,
+    ) -> LocalRuleToxicityDetector:
+        offensive = _load_path_lines(offensive_phrases_path)
+        prohibited = _load_path_lines(prohibited_terms_path)
+        return cls._with_policy_adjustments(offensive, prohibited)
+
+    @classmethod
+    def _with_policy_adjustments(
+        cls,
+        offensive: set[str],
+        prohibited: set[str],
+    ) -> LocalRuleToxicityDetector:
         offensive = (offensive - {_normalize_text(item) for item in REMOVE_FROM_BLACKLIST}) | {
             _normalize_text(item) for item in ADD_TO_BLACKLIST
         }
@@ -208,9 +228,19 @@ class LocalRuleToxicityDetector:
         return None
 
 
-def _load_resource_lines(filename: str) -> set[str]:
+def _load_optional_resource_lines(filename: str) -> set[str]:
     data = resources.files("toxicity_detection.data").joinpath(filename)
-    with data.open("r", encoding="utf-8", errors="ignore") as handle:
+    try:
+        with data.open("r", encoding="utf-8", errors="ignore") as handle:
+            return {_normalize_text(line) for line in handle if _normalize_text(line)}
+    except FileNotFoundError:
+        return set()
+
+
+def _load_path_lines(path: str | Path | None) -> set[str]:
+    if path is None:
+        return set()
+    with Path(path).open("r", encoding="utf-8", errors="ignore") as handle:
         return {_normalize_text(line) for line in handle if _normalize_text(line)}
 
 
@@ -242,4 +272,3 @@ def _max_phrase_len(phrases: set[str]) -> int:
 
 
 LocalRuleSafetyDetector = LocalRuleToxicityDetector
-

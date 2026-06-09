@@ -34,3 +34,5 @@ env/
 models/
 checkpoints/
 
+# Private local rule lists
+src/toxicity_detection/data/*.txt

@@ -34,7 +34,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-local-rules",
         action="store_true",
-        help="Disable the packaged local rule detector.",
+        help="Disable the local rule detector.",
+    )
+    parser.add_argument(
+        "--offensive-phrases-file",
+        default=None,
+        help="Optional newline-delimited custom offensive phrase list.",
+    )
+    parser.add_argument(
+        "--prohibited-terms-file",
+        default=None,
+        help="Optional newline-delimited custom prohibited term list.",
     )
     parser.add_argument(
         "--detoxify",
@@ -61,7 +71,18 @@ def main(argv: list[str] | None = None) -> int:
 
     detectors = []
     if not args.no_local_rules:
-        detectors.append(LocalRuleToxicityDetector.from_package_data())
+        try:
+            if args.offensive_phrases_file or args.prohibited_terms_file:
+                detectors.append(
+                    LocalRuleToxicityDetector.from_files(
+                        offensive_phrases_path=args.offensive_phrases_file,
+                        prohibited_terms_path=args.prohibited_terms_file,
+                    )
+                )
+            else:
+                detectors.append(LocalRuleToxicityDetector.from_package_data())
+        except OSError as exc:
+            parser.error(f"could not read custom rule list: {exc}")
     if args.detoxify:
         try:
             detectors.append(

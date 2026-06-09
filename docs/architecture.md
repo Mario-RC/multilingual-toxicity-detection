@@ -3,7 +3,7 @@
 The package is intentionally small and split into independently testable modules:
 
 - `schemas`: enum and result dataclass shared by every detector.
-- `local_rules`: deterministic multilingual pattern and phrase checks backed by packaged data files.
+- `local_rules`: deterministic multilingual pattern checks plus optional user-provided phrase files.
 - `filter`: priority-ordered composition of detectors.
 - `responses`: deterministic Spanish and English responses for flagged categories.
 - `detoxify_adapter`: optional Detoxify integration, loaded only when instantiated.
@@ -18,9 +18,8 @@ The default filter uses only `LocalRuleToxicityDetector.from_package_data()`, so
 
 ## Packaging
 
-The rule lists are distributed as package data under `toxicity_detection.data`. They are loaded with `importlib.resources`, which works both from an editable checkout and from an installed wheel.
+Curated rule lists are not distributed with the repository. Projects that need broader lexical coverage should provide their own newline-delimited `.txt` files and load them with `LocalRuleToxicityDetector.from_files(...)` or the matching CLI flags.
 
 ## Stability Notes
 
 The API favors plain dataclasses and enums. `ToxicityResult.to_dict()` returns JSON-safe primitive values for service boundaries, logs, and CLI output.
-

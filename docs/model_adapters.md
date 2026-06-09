@@ -18,7 +18,10 @@ from toxicity_detection.detoxify_adapter import DetoxifyToxicityDetector
 
 detector = ToxicityFilter(
     detectors=[
-        LocalRuleToxicityDetector.from_package_data(),
+        LocalRuleToxicityDetector.from_files(
+            offensive_phrases_path="./offensive_phrases.txt",
+            prohibited_terms_path="./prohibited_terms.txt",
+        ),
         DetoxifyToxicityDetector(model_type="multilingual"),
     ]
 )
@@ -46,4 +49,3 @@ detector = LlamaGuardToxicityDetector(
 ```
 
 The model is loaded during detector construction, not at package import time.
-
