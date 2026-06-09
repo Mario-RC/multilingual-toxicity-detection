@@ -65,34 +65,24 @@ printf "text to review" | toxicity-detect --language en --json
 
 ## Python API
 
-Spanish:
-
 ```python
 from toxicity_detection import ToxicityCategory, ToxicityFilter, toxicity_response
 
 detector = ToxicityFilter.default()
-result = detector.check("Por favor, callate.")
 
-if result.flagged:
-    print(result.category)
-    print(toxicity_response(result.category, language="es"))
-else:
-    print(ToxicityCategory.SAFE)
-```
+examples = [
+    ("es", "Por favor, callate."),
+    ("en", "Please shut up."),
+]
 
-English:
-
-```python
-from toxicity_detection import ToxicityCategory, ToxicityFilter, toxicity_response
-
-detector = ToxicityFilter.default()
-result = detector.check("Please shut up.")
-
-if result.flagged:
-    print(result.category)
-    print(toxicity_response(result.category, language="en"))
-else:
-    print(ToxicityCategory.SAFE)
+for language, text in examples:
+    result = detector.check(text)
+    print(f"[{language}] {text}")
+    if result.flagged:
+        print(result.category)
+        print(toxicity_response(result.category, language=language))
+    else:
+        print(ToxicityCategory.SAFE)
 ```
 
 Compose detectors explicitly when using optional models:
