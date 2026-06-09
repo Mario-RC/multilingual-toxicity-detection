@@ -158,11 +158,11 @@ detector = ToxicityFilter(
 ## Repository Layout
 
 ```text
-src/toxicity_detection/    importable Python package
-src/toxicity_detection/data extensible rule files
-tests/                     unit tests
-examples/                  minimal usage examples
-docs/                      architecture and adapter notes
+src/toxicity_detection/        importable Python package
+src/toxicity_detection/data/   extensible rule files
+tests/                         unit tests
+examples/                      minimal usage examples
+docs/                          architecture and adapter notes
 ```
 
 ## Responsible Use
