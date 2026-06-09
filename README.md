@@ -126,7 +126,3 @@ docs/                      architecture and adapter notes
 ## Responsible Use
 
 Toxicity detection is probabilistic and context-sensitive, even when local rules are deterministic. Use this package as a safety signal, not as the only authority for moderation decisions. Review false positives and false negatives for the domain where it will be deployed.
-
-## License
-
-See `LICENSE`.
