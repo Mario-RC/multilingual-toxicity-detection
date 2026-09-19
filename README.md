@@ -1,4 +1,4 @@
-# Toxicity Detection
+# Multilingual Toxicity Detection
 
 Standalone multilingual toxicity detection package extracted from the affective dialogue system. It provides a fast local rule-based detector by default and optional adapters for heavier moderation models such as Detoxify and Llama Guard.
 
@@ -67,6 +67,8 @@ Private local lists can remain outside Git. The repository ignores the legacy lo
 ## Installation
 
 ```bash
+git clone https://github.com/Mario-RC/multilingual-toxicity-detection.git
+cd multilingual-toxicity-detection
 python -m pip install -e ".[dev]"
 ```
 
